@@ -14,7 +14,7 @@
 
   https://www.arduino.cc/en/Tutorial/BuiltInExamples/StringToInt
 */
-
+#include "Arduino.h"
 String inString = "";    // string to hold input
 
 void setup() {
