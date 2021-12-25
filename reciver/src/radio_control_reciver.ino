@@ -25,14 +25,6 @@ void setup()
   pinMode(ESD_pin, 1);
   pinMode(ppm_pin, 1);
   Serial.begin(57600);
-  while (!Serial)
-  {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
-
-  // send an intro:
-  Serial.println("\n\nString toInt():");
-  Serial.println();
 }
 
 void loop()
