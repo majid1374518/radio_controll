@@ -1,19 +1,3 @@
-/*
-  String to Integer conversion
-
-  Reads a serial input sthing until it sees a newline, then converts the string
-  to a number if the charhiters are digits.
-
-  The circuit:
-  - No external components needed.
-
-  created 29 Nov 2010
-  by Tom Igoe
-
-  This example code is in the public domain.
-
-  https://www.arduino.cc/en/Tutorial/BuiltInExamples/StringToInt
-*/
 #define pwm_pin_1 2
 #define pwm_pin_2 3
 #define pwm_pin_3 4
