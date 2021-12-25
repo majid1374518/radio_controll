@@ -42,7 +42,7 @@ void loop()
     check_inchar(inChar);
   }
 }
-void ppm_maker(void)
+void ppm_maker(void)//salam
 {
   int initial_time = micros();
   time = micros();
