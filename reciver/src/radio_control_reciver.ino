@@ -169,7 +169,5 @@ void check_inchar(int inChar)
     int val = map(inString.toInt(), 0, 1023, 0, 180);
     pwm_channel_5.write(val);
     inString = "";
-    //salam
-  
   }
 }
