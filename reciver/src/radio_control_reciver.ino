@@ -12,7 +12,9 @@
 #include "Servo.h"
 
 unsigned long int time = 0;
-String inString = ""; // string to hold input
+String inString = "";          // string to hold input
+String original_inString = ""; // input without length assign to this variable
+String length_inString = "";   // lengh of the input assign here
 Servo pwm_channel_1, pwm_channel_2, pwm_channel_3, pwm_channel_4, pwm_channel_5, pwm_channel_6;
 int last_pwm_pin_1_status = 0, last_pwm_pin_2_status = 0, last_pwm_pin_3_status = 0, last_pwm_pin_4_status = 0, last_pwm_pin_5_status = 0;
 void setup()
@@ -22,16 +24,19 @@ void setup()
   pwm_channel_3.attach(pwm_pin_3);
   pwm_channel_4.attach(pwm_pin_4);
   pwm_channel_5.attach(pwm_pin_5);
-  pinMode(ESD_pin, 1);
-  pinMode(ppm_pin, 1);
+  pinMode(ESD_pin, OUTPUT);
+  pinMode(ppm_pin, OUTPUT);
+  pinMode(10, OUTPUT);
   Serial.begin(57600);
 }
 
 void loop()
 {
+
   ppm_maker();
+
   // Read serial input:
-  while (Serial.available() > 0)
+  while (Serial.available())
   {
     int inChar = Serial.read();
     if (isDigit(inChar))
@@ -39,8 +44,23 @@ void loop()
       // convert the incoming byte to a char and add it to the string:
       inString += (char)inChar;
     }
+    if (inChar != 'N')
+    {
+      length_inString += (char)inChar;
+    }
+    if (inChar == 'N')
+    {
+      original_inString = length_inString;
+      length_inString = "";
+    }
     check_inchar(inChar);
   }
+  Serial.println("ORIGINAL STRING=" + original_inString);
+  Serial.println("STRING LENGTH=" + length_inString);
+  delay(500);
+  check_received_string(original_inString, length_inString);
+  length_inString = "";
+  original_inString = "";
 }
 void ppm_maker(void)
 {
@@ -55,6 +75,7 @@ void ppm_maker(void)
     digitalWrite(ppm_pin, LOW);
     last_pwm_pin_1_status = pwm_pin_1_status;
   }
+
   time = micros();
   int pwm_pin_2_status = digitalRead(pwm_pin_2);
   if (last_pwm_pin_2_status != pwm_pin_2_status)
@@ -114,60 +135,49 @@ void check_inchar(int inChar)
 {
   if (inChar == 'T')
   {
-    // Serial.println();
-    // Serial.print("Trottle=");
-    // Serial.println(inString.toInt());
-    // analogWrite(11, inString.toInt() / 4);
     int val = map(inString.toInt(), 0, 1023, 0, 180);
     pwm_channel_1.write(val);
     inString = "";
   }
   if (inChar == 'P')
   {
-    // Serial.println();
-    // Serial.print("Pitch=");
-    // Serial.println(inString.toInt());
-    // analogWrite(10, inString.toInt() / 4);
     int val = map(inString.toInt(), 0, 1023, 0, 180);
     pwm_channel_2.write(val);
     inString = "";
   }
   if (inChar == 'R')
   {
-    // Serial.println();
-    // Serial.print("Roll=");
-    // Serial.println(inString.toInt());
-    // analogWrite(9, inString.toInt() / 4);
     int val = map(inString.toInt(), 0, 1023, 0, 180);
     pwm_channel_3.write(val);
     inString = "";
   }
   if (inChar == 'Y')
   {
-    // Serial.println();
-    // Serial.print("Yaw=");
-    // Serial.println(inString.toInt());
-    // analogWrite(6, inString.toInt() / 4);
     int val = map(inString.toInt(), 0, 1023, 0, 180);
     pwm_channel_4.write(val);
     inString = "";
   }
   if (inChar == 'E')
   {
-    // Serial.println();
-    // Serial.print("ESD=");
-    // Serial.println(inString.toInt());
     digitalWrite(ESD_pin, inString.toInt());
     inString = "";
   }
   if (inChar == 'D')
   {
-    // Serial.println();
-    // Serial.print("PID=");
-    // Serial.println(inString.toInt());
-    // analogWrite(3, inString.toInt() / 4);
     int val = map(inString.toInt(), 0, 1023, 0, 180);
     pwm_channel_5.write(val);
     inString = "";
+  }
+}
+void check_received_string(String input1, String input2) // check the length of the original string
+{
+
+  int L = input1.length(); // convert the length string into the integer
+  if (L != input2.toInt()) // compare the length of the original string and the extracted length
+  {
+    //  if they are not equal, we read the serial input again
+    digitalWrite(ESD_pin, 1);
+    delay(10);
+    digitalWrite(ESD_pin, 0);
   }
 }
