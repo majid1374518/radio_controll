@@ -6,12 +6,20 @@
 #define ESD_pin 9
 #define ppm_pin 8
 #define ppm_high_time 100
+#define trottle 0
+#define pitch 1
+#define roll 2
+#define yaw 3
+#define esd 4
+#define pid 5
 
 #include "Arduino.h"
 #include "math.h"
 #include "Servo.h"
 
 unsigned long int time = 0;
+uint16_t inChar1, inChar2, inChar3;
+int input2, input3, input4;
 String inString = "";          // string to hold input
 String original_inString = ""; // input without length assign to this variable
 String length_inString = "";   // lengh of the input assign here
@@ -32,35 +40,99 @@ void setup()
 
 void loop()
 {
-
   ppm_maker();
-
   // Read serial input:
   while (Serial.available())
   {
-    int inChar = Serial.read();
-    if (isDigit(inChar))
+    uint16_t input1 = Serial.read();
+    input2 = input1;
+    input3 = input1;
+    input4 = input1;
+    input3 = (input3 >> 7) & 0x01;
+    input4 = (input4 >> 15) & 0x01;
+    input4 = ~input4;
+    if (input3 & input4)
     {
-      // convert the incoming byte to a char and add it to the string:
-      inString += (char)inChar;
+      input2 = (input2 >> 4) & 0x07;
+      if (uint8_t(input2) == trottle)
+      {
+        inChar1 = trottle;
+        inChar2 = input1;
+        inChar3 = input1;
+        inChar2 = (inChar2 >> 0) & 0x07;
+        inChar3 = (inChar3 >> 8) & 0xFF;
+        inChar2 = 127 * inChar2 + inChar3;
+        check_inchar(inChar1);
+      }
+      if (uint8_t(input2) == pitch)
+      {
+        inChar1 = pitch;
+        inChar2 = input1;
+        inChar3 = input1;
+        inChar2 = (inChar2 >> 0) & 0x07;
+        inChar3 = (inChar3 >> 8) & 0xFF;
+        inChar2 = 127 * inChar2 + inChar3;
+        check_inchar(inChar1);
+      }
+      if (uint8_t(input2) == roll)
+      {
+        inChar1 = roll;
+        inChar2 = input1;
+        inChar3 = input1;
+        inChar2 = (inChar2 >> 0) & 0x07;
+        inChar3 = (inChar3 >> 8) & 0xFF;
+        inChar2 = 127 * inChar2 + inChar3;
+        check_inchar(inChar1);
+      }
+      if (uint8_t(input2) == yaw)
+      {
+        inChar1 = yaw;
+        inChar2 = input1;
+        inChar3 = input1;
+        inChar2 = (inChar2 >> 0) & 0x07;
+        inChar3 = (inChar3 >> 8) & 0xFF;
+        inChar2 = 127 * inChar2 + inChar3;
+        check_inchar(inChar1);
+      }
+      if (uint8_t(input2) == esd)
+      {
+        inChar1 = esd;
+        inChar2 = input1;
+        inChar3 = input1;
+        inChar2 = (inChar2 >> 0) & 0x07;
+        inChar3 = (inChar3 >> 8) & 0xFF;
+        inChar2 = 127 * inChar2 + inChar3;
+        check_inchar(inChar1);
+      }
+      if (uint8_t(input2) == pid)
+      {
+        inChar1 = pid;
+        inChar2 = input1;
+        inChar3 = input1;
+        inChar2 = (inChar2 >> 0) & 0x07;
+        inChar3 = (inChar3 >> 8) & 0xFF;
+        inChar2 = 127 * inChar2 + inChar3;
+        check_inchar(inChar1);
+      }
     }
-    if (inChar != 'N')
-    {
-      length_inString += (char)inChar;
-    }
-    if (inChar == 'N')
-    {
-      original_inString = length_inString;
-      length_inString = "";
-    }
-    check_inchar(inChar);
+    // convert the incoming byte to a char and add it to the string:
+    // inString += (char)inChar1;
+    // if (inChar != 'N')
+    //{
+    //   length_inString += (char)inChar;
+    // }
+    // if (inChar == 'N')
+    //{
+    //   original_inString = length_inString;
+    //   length_inString = "";
+    // }
   }
-  Serial.println("ORIGINAL STRING=" + original_inString);
-  Serial.println("STRING LENGTH=" + length_inString);
-  delay(500);
-  check_received_string(original_inString, length_inString);
-  length_inString = "";
-  original_inString = "";
+  // Serial.println("ORIGINAL STRING=" + original_inString);
+  // Serial.println("STRING LENGTH=" + length_inString);
+  // delay(500);
+  // check_received_string(original_inString, length_inString);
+  // length_inString = "";
+  // original_inString = "";
 }
 void ppm_maker(void)
 {
@@ -131,53 +203,47 @@ void ppm_maker(void)
   while (micros() - initial_time < 25000)
     ;
 }
-void check_inchar(int inChar)
+void check_inchar(unsigned int inChar)
 {
-  if (inChar == 'T')
+  if (inChar == trottle)
   {
-    int val = map(inString.toInt(), 0, 1023, 0, 180);
+    int val = map(inChar2, 0, 1023, 0, 180);
     pwm_channel_1.write(val);
-    inString = "";
   }
-  if (inChar == 'P')
+  if (inChar == pitch)
   {
-    int val = map(inString.toInt(), 0, 1023, 0, 180);
+    int val = map(inChar2, 0, 1023, 0, 180);
     pwm_channel_2.write(val);
-    inString = "";
   }
-  if (inChar == 'R')
+  if (inChar == roll)
   {
-    int val = map(inString.toInt(), 0, 1023, 0, 180);
+    int val = map(inChar2, 0, 1023, 0, 180);
     pwm_channel_3.write(val);
-    inString = "";
   }
-  if (inChar == 'Y')
+  if (inChar == yaw)
   {
-    int val = map(inString.toInt(), 0, 1023, 0, 180);
+    int val = map(inChar2, 0, 1023, 0, 180);
     pwm_channel_4.write(val);
-    inString = "";
   }
-  if (inChar == 'E')
+  if (inChar == esd)
   {
-    digitalWrite(ESD_pin, inString.toInt());
-    inString = "";
+    digitalWrite(ESD_pin, inChar2);
   }
-  if (inChar == 'D')
+  if (inChar == pid)
   {
-    int val = map(inString.toInt(), 0, 1023, 0, 180);
+    int val = map(inChar2, 0, 1023, 0, 180);
     pwm_channel_5.write(val);
-    inString = "";
   }
 }
-void check_received_string(String input1, String input2) // check the length of the original string
-{
+// void check_received_string(String input1, String input2) // check the length of the original string
+//{
 
-  int L = input1.length(); // convert the length string into the integer
-  if (L != input2.toInt()) // compare the length of the original string and the extracted length
-  {
-    //  if they are not equal, we read the serial input again
-    digitalWrite(ESD_pin, 1);
-    delay(10);
-    digitalWrite(ESD_pin, 0);
-  }
-}
+// int L = input1.length(); // convert the length string into the integer
+// if (L != input2.toInt()) // compare the length of the original string and the extracted length
+//{
+//   if they are not equal, we read the serial input again
+//  digitalWrite(ESD_pin, 1);
+//  delay(10);
+//  digitalWrite(ESD_pin, 0);
+//}
+//}
