@@ -31,51 +31,7 @@ void loop()
   int Esd = digitalRead(Emergency_shut_down_pin);
   int PID_tuner = analogRead(A1);
   bit_maker(Trottle, Pitch, Roll, Yaw, Esd, PID_tuner);
-  // if (0 <= Trottle < 256)
-  // {
-  //   T = char(Trottle);
-  // }
-  // if (0 <= Pitch < 256)
-  // {
-  //   P = char(Pitch);
-  // }
-  // if (0 <= Roll < 256)
-  // {
-  //   R = char(Roll);
-  // }
-  // if (0 <= Yaw < 256)
-  // {
-  //   Y = char(Yaw);
-  // }
-  // E = char(Esd);
-  // if (0 <= PID_tuner < 256)
-  // {
-  //   D = char(PID_tuner);
-  // }
-  // else if (256 <= Trottle < 1023)
-  // {
-  //   /* code */
-  // }
-  // else if (256 <= Pitch < 1023)
-  // {
-  //   /* code */
-  // }
-  // else if (256 <= Roll < 1023)
-  // {
-  //   /* code */
-  // }
-  // else if (256 <= Yaw < 1023)
-  // {
-  //   /* code */
-  // }
-  // else if (256 <= PID_tuner < 1023)
-  // {
-  //   /* code */
-  // }
-  // instring = (T + P + R + Y + E + D);
-  // // convertor(instring);
-  // Serial.println(instring);
-  // delay(2);
+  Serial.println();
 }
 
 void bit_maker(int trottle_in, int pitch_in, int roll_in, int yaw_in, int esd_in, int pid_in)
@@ -97,10 +53,4 @@ void bit_maker(int trottle_in, int pitch_in, int roll_in, int yaw_in, int esd_in
   {
     Serial.print(data_packet[i]);
   }
-  // Serial.println(trottle_in);
-  // Serial.println(pitch_in);
-  // Serial.println(roll_in);
-  // Serial.println(yaw_in);
-  // Serial.println(esd_in);
-  // Serial.println(pid_in);
 }

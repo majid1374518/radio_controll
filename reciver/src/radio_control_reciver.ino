@@ -17,12 +17,13 @@
 #include "math.h"
 #include "Servo.h"
 
+const int BUFFER_SIZE = 12;
+char buf[BUFFER_SIZE];
 unsigned long int time = 0;
-uint16_t inChar1, inChar2, inChar3;
-int input2, input3, input4;
-String inString = "";          // string to hold input
-String original_inString = ""; // input without length assign to this variable
-String length_inString = "";   // lengh of the input assign here
+uint16_t inChar;
+uint16_t input1, input2, input3, input4, input5, input6, input7, input8, input9, input10, input11, input12;
+uint16_t check1, check2, check3, check4, check5, check6, check7, check8, check9, check10, check11, check12;
+uint16_t joystick1, joystick2, joystick3, joystick4, joystick5, joystick6;
 Servo pwm_channel_1, pwm_channel_2, pwm_channel_3, pwm_channel_4, pwm_channel_5, pwm_channel_6;
 int last_pwm_pin_1_status = 0, last_pwm_pin_2_status = 0, last_pwm_pin_3_status = 0, last_pwm_pin_4_status = 0, last_pwm_pin_5_status = 0;
 void setup()
@@ -40,99 +41,117 @@ void setup()
 
 void loop()
 {
-  ppm_maker();
   // Read serial input:
   while (Serial.available())
   {
-    uint16_t input1 = Serial.read();
-    input2 = input1;
-    input3 = input1;
-    input4 = input1;
-    input3 = (input3 >> 7) & 0x01;
-    input4 = (input4 >> 15) & 0x01;
-    input4 = ~input4;
-    if (input3 & input4)
+    // reading the incoming data with the function below
+    Serial.readBytesUntil('\n', buf, BUFFER_SIZE);
+    // we put each byte in a integer
+    input1 = buf[0];
+    check1 = input1;
+    input2 = buf[1];
+    check2 = input2;
+    input3 = buf[2];
+    check3 = input3;
+    input4 = buf[3];
+    check4 = input4;
+    input5 = buf[4];
+    check5 = input5;
+    input6 = buf[5];
+    check6 = input6;
+    input7 = buf[6];
+    check7 = input7;
+    input8 = buf[7];
+    check8 = input8;
+    input9 = buf[8];
+    check9 = input9;
+    input10 = buf[9];
+    check10 = input10;
+    input11 = buf[10];
+    check11 = input11;
+    input12 = buf[11];
+    check12 = input12;
+    // with this variables we extract binary '1' for even bytes and binary '0' for odd bytes
+    check1 = (check1 >> 7) & 0x01;
+    check2 = (check2 >> 7) & 0x01;
+    check3 = (check3 >> 7) & 0x01;
+    check4 = (check4 >> 7) & 0x01;
+    check5 = (check5 >> 7) & 0x01;
+    check6 = (check6 >> 7) & 0x01;
+    check7 = (check7 >> 7) & 0x01;
+    check8 = (check8 >> 7) & 0x01;
+    check9 = (check9 >> 7) & 0x01;
+    check10 = (check10 >> 7) & 0x01;
+    check11 = (check11 >> 7) & 0x01;
+    check12 = (check12 >> 7) & 0x01;
+    // with the check bit for each byte, we control the data loss with isshown below:
+    if ((check1 & ~check2) && (check3 & ~check4) && (check5 & ~check6) && (check7 & ~check8) && (check9 & ~check10) && (check11 & ~check12))
     {
-      input2 = (input2 >> 4) & 0x07;
-      if (uint8_t(input2) == trottle)
+      // we use these variables to check whitch joystick has been moved
+      joystick1 = input1;
+      joystick2 = input3;
+      joystick3 = input5;
+      joystick4 = input7;
+      joystick5 = input9;
+      joystick6 = input11;
+      joystick1 = (joystick1 >> 4) & 0x07;
+      joystick2 = (joystick2 >> 4) & 0x07;
+      joystick3 = (joystick3 >> 4) & 0x07;
+      joystick4 = (joystick4 >> 4) & 0x07;
+      joystick5 = (joystick5 >> 4) & 0x07;
+      joystick6 = (joystick6 >> 4) & 0x07;
+      if (uint8_t(joystick1) == trottle)
       {
-        inChar1 = trottle;
-        inChar2 = input1;
-        inChar3 = input1;
-        inChar2 = (inChar2 >> 0) & 0x07;
-        inChar3 = (inChar3 >> 8) & 0xFF;
-        inChar2 = 127 * inChar2 + inChar3;
-        check_inchar(inChar1);
+        inChar = trottle;
+        input1 = (input1 >> 0) & 0x07;
+        input2 = (input2 >> 0) & 0x7F;
+        // we use this equation to extract the 10 bit value that has been sent from transmitter
+        input1 = 127 * input1 + input2;
+        check_inchar(inChar, input1);
       }
-      if (uint8_t(input2) == pitch)
+      if (uint8_t(joystick2) == pitch)
       {
-        inChar1 = pitch;
-        inChar2 = input1;
-        inChar3 = input1;
-        inChar2 = (inChar2 >> 0) & 0x07;
-        inChar3 = (inChar3 >> 8) & 0xFF;
-        inChar2 = 127 * inChar2 + inChar3;
-        check_inchar(inChar1);
+        inChar = pitch;
+        input3 = (input1 >> 0) & 0x07;
+        input4 = (input2 >> 0) & 0x7F;
+        input3 = 127 * input3 + input4;
+        check_inchar(inChar, input3);
       }
-      if (uint8_t(input2) == roll)
+      if (uint8_t(joystick3) == roll)
       {
-        inChar1 = roll;
-        inChar2 = input1;
-        inChar3 = input1;
-        inChar2 = (inChar2 >> 0) & 0x07;
-        inChar3 = (inChar3 >> 8) & 0xFF;
-        inChar2 = 127 * inChar2 + inChar3;
-        check_inchar(inChar1);
+        inChar = roll;
+        input5 = (input5 >> 0) & 0x07;
+        input6 = (input6 >> 8) & 0xFF;
+        input5 = 127 * input5 + input6;
+        check_inchar(inChar, input5);
       }
-      if (uint8_t(input2) == yaw)
+      if (uint8_t(joystick4) == yaw)
       {
-        inChar1 = yaw;
-        inChar2 = input1;
-        inChar3 = input1;
-        inChar2 = (inChar2 >> 0) & 0x07;
-        inChar3 = (inChar3 >> 8) & 0xFF;
-        inChar2 = 127 * inChar2 + inChar3;
-        check_inchar(inChar1);
+        inChar = yaw;
+        input7 = (input7 >> 0) & 0x07;
+        input8 = (input8 >> 8) & 0xFF;
+        input7 = 127 * input7 + input8;
+        check_inchar(inChar, input7);
       }
-      if (uint8_t(input2) == esd)
+      if (uint8_t(joystick5) == esd)
       {
-        inChar1 = esd;
-        inChar2 = input1;
-        inChar3 = input1;
-        inChar2 = (inChar2 >> 0) & 0x07;
-        inChar3 = (inChar3 >> 8) & 0xFF;
-        inChar2 = 127 * inChar2 + inChar3;
-        check_inchar(inChar1);
+        inChar = esd;
+        input9 = (input9 >> 0) & 0x07;
+        input10 = (input10 >> 8) & 0xFF;
+        input9 = 127 * input9 + input10;
+        check_inchar(inChar, input9);
       }
-      if (uint8_t(input2) == pid)
+      if (uint8_t(joystick6) == pid)
       {
-        inChar1 = pid;
-        inChar2 = input1;
-        inChar3 = input1;
-        inChar2 = (inChar2 >> 0) & 0x07;
-        inChar3 = (inChar3 >> 8) & 0xFF;
-        inChar2 = 127 * inChar2 + inChar3;
-        check_inchar(inChar1);
+        inChar = pid;
+        input11 = (input11 >> 0) & 0x07;
+        input12 = (input12 >> 8) & 0xFF;
+        input11 = 127 * input11 + input12;
+        check_inchar(inChar, input11);
       }
     }
-    // convert the incoming byte to a char and add it to the string:
-    // inString += (char)inChar1;
-    // if (inChar != 'N')
-    //{
-    //   length_inString += (char)inChar;
-    // }
-    // if (inChar == 'N')
-    //{
-    //   original_inString = length_inString;
-    //   length_inString = "";
-    // }
+    ppm_maker();
   }
-  // Serial.println("ORIGINAL STRING=" + original_inString);
-  // Serial.println("STRING LENGTH=" + length_inString);
-  // delay(500);
-  // check_received_string(original_inString, length_inString);
-  // length_inString = "";
-  // original_inString = "";
 }
 void ppm_maker(void)
 {
@@ -203,47 +222,35 @@ void ppm_maker(void)
   while (micros() - initial_time < 25000)
     ;
 }
-void check_inchar(unsigned int inChar)
+void check_inchar(unsigned int IN1, unsigned int IN2)
 {
   if (inChar == trottle)
   {
-    int val = map(inChar2, 0, 1023, 0, 180);
+    int val = map(input1, 0, 1023, 0, 180);
     pwm_channel_1.write(val);
   }
   if (inChar == pitch)
   {
-    int val = map(inChar2, 0, 1023, 0, 180);
+    int val = map(input3, 0, 1023, 0, 180);
     pwm_channel_2.write(val);
   }
   if (inChar == roll)
   {
-    int val = map(inChar2, 0, 1023, 0, 180);
+    int val = map(input5, 0, 1023, 0, 180);
     pwm_channel_3.write(val);
   }
   if (inChar == yaw)
   {
-    int val = map(inChar2, 0, 1023, 0, 180);
+    int val = map(input7, 0, 1023, 0, 180);
     pwm_channel_4.write(val);
   }
   if (inChar == esd)
   {
-    digitalWrite(ESD_pin, inChar2);
+    digitalWrite(ESD_pin, input9);
   }
   if (inChar == pid)
   {
-    int val = map(inChar2, 0, 1023, 0, 180);
+    int val = map(input11, 0, 1023, 0, 180);
     pwm_channel_5.write(val);
   }
 }
-// void check_received_string(String input1, String input2) // check the length of the original string
-//{
-
-// int L = input1.length(); // convert the length string into the integer
-// if (L != input2.toInt()) // compare the length of the original string and the extracted length
-//{
-//   if they are not equal, we read the serial input again
-//  digitalWrite(ESD_pin, 1);
-//  delay(10);
-//  digitalWrite(ESD_pin, 0);
-//}
-//}
