@@ -32,6 +32,7 @@ void loop()
   int PID_tuner = analogRead(A1);
   bit_maker(Trottle, Pitch, Roll, Yaw, Esd, PID_tuner);
   Serial.println();
+  delay(10);
 }
 
 void bit_maker(int trottle_in, int pitch_in, int roll_in, int yaw_in, int esd_in, int pid_in)

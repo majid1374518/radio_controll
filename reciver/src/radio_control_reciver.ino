@@ -6,6 +6,7 @@
 #define ESD_pin 9
 #define ppm_pin 8
 #define ppm_high_time 100
+
 #define trottle 0
 #define pitch 1
 #define roll 2
@@ -17,7 +18,7 @@
 #include "math.h"
 #include "Servo.h"
 
-const int BUFFER_SIZE = 12;
+const int BUFFER_SIZE = 14;
 char buf[BUFFER_SIZE];
 unsigned long int time = 0;
 uint16_t inChar;
@@ -45,31 +46,31 @@ void loop()
   while (Serial.available())
   {
     // reading the incoming data with the function below
-    Serial.readBytesUntil('\n', buf, BUFFER_SIZE);
+    Serial.readBytesUntil('\r', buf, BUFFER_SIZE);
     // we put each byte in a integer
-    input1 = buf[0];
+    input1 = buf[1];
     check1 = input1;
-    input2 = buf[1];
+    input2 = buf[2];
     check2 = input2;
-    input3 = buf[2];
+    input3 = buf[3];
     check3 = input3;
-    input4 = buf[3];
+    input4 = buf[4];
     check4 = input4;
-    input5 = buf[4];
+    input5 = buf[5];
     check5 = input5;
-    input6 = buf[5];
+    input6 = buf[6];
     check6 = input6;
-    input7 = buf[6];
+    input7 = buf[7];
     check7 = input7;
-    input8 = buf[7];
+    input8 = buf[8];
     check8 = input8;
-    input9 = buf[8];
+    input9 = buf[9];
     check9 = input9;
-    input10 = buf[9];
+    input10 = buf[10];
     check10 = input10;
-    input11 = buf[10];
+    input11 = buf[11];
     check11 = input11;
-    input12 = buf[11];
+    input12 = buf[12];
     check12 = input12;
     // with this variables we extract binary '1' for even bytes and binary '0' for odd bytes
     check1 = (check1 >> 7) & 0x01;
@@ -87,6 +88,7 @@ void loop()
     // with the check bit for each byte, we control the data loss with isshown below:
     if ((check1 & ~check2) && (check3 & ~check4) && (check5 & ~check6) && (check7 & ~check8) && (check9 & ~check10) && (check11 & ~check12))
     {
+      Serial.println("ok");
       // we use these variables to check whitch joystick has been moved
       joystick1 = input1;
       joystick2 = input3;
@@ -224,33 +226,33 @@ void ppm_maker(void)
 }
 void check_inchar(unsigned int IN1, unsigned int IN2)
 {
-  if (inChar == trottle)
+  if (IN1 == trottle)
   {
-    int val = map(input1, 0, 1023, 0, 180);
+    int val = map(IN2, 0, 1023, 0, 180);
     pwm_channel_1.write(val);
   }
-  if (inChar == pitch)
+  if (IN1 == pitch)
   {
-    int val = map(input3, 0, 1023, 0, 180);
+    int val = map(IN2, 0, 1023, 0, 180);
     pwm_channel_2.write(val);
   }
-  if (inChar == roll)
+  if (IN1 == roll)
   {
-    int val = map(input5, 0, 1023, 0, 180);
+    int val = map(IN2, 0, 1023, 0, 180);
     pwm_channel_3.write(val);
   }
-  if (inChar == yaw)
+  if (IN1 == yaw)
   {
-    int val = map(input7, 0, 1023, 0, 180);
+    int val = map(IN2, 0, 1023, 0, 180);
     pwm_channel_4.write(val);
   }
-  if (inChar == esd)
+  if (IN1 == esd)
   {
-    digitalWrite(ESD_pin, input9);
+    digitalWrite(ESD_pin, IN2);
   }
-  if (inChar == pid)
+  if (IN1 == pid)
   {
-    int val = map(input11, 0, 1023, 0, 180);
+    int val = map(IN2, 0, 1023, 0, 180);
     pwm_channel_5.write(val);
   }
 }
